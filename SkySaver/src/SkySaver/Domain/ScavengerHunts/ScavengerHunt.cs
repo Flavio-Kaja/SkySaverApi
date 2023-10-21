@@ -14,12 +14,13 @@ public class ScavengerHunt : BaseEntity
 {
     public int HuntID { get; private set; }
 
-    public int UserID { get; private set; }
+    public Guid UserID { get; private set; }
 
     public int PointsEarned { get; private set; }
 
     public DateTime CompletionDate { get; private set; }
 
+    public SkySaver.Domain.Users.User User { get; set; }
 
     public static ScavengerHunt Create(ScavengerHuntForCreation scavengerHuntForCreation)
     {
@@ -30,8 +31,8 @@ public class ScavengerHunt : BaseEntity
         newScavengerHunt.PointsEarned = scavengerHuntForCreation.PointsEarned;
         newScavengerHunt.CompletionDate = scavengerHuntForCreation.CompletionDate;
 
-        newScavengerHunt.QueueDomainEvent(new ScavengerHuntCreated(){ ScavengerHunt = newScavengerHunt });
-        
+        newScavengerHunt.QueueDomainEvent(new ScavengerHuntCreated() { ScavengerHunt = newScavengerHunt });
+
         return newScavengerHunt;
     }
 
@@ -42,9 +43,9 @@ public class ScavengerHunt : BaseEntity
         PointsEarned = scavengerHuntForUpdate.PointsEarned;
         CompletionDate = scavengerHuntForUpdate.CompletionDate;
 
-        QueueDomainEvent(new ScavengerHuntUpdated(){ Id = Id });
+        QueueDomainEvent(new ScavengerHuntUpdated() { Id = Id });
         return this;
     }
-    
+
     protected ScavengerHunt() { } // For EF + Mocking
 }

@@ -17,7 +17,6 @@ public static class SwaggerServiceExtension
 {
     public static void AddSwaggerExtension(this IServiceCollection services, IConfiguration configuration)
     {
-        var authOptions = configuration.GetAuthOptions();
         services.AddSwaggerGen(config =>
         {
             config.CustomSchemaIds(type => type.ToString());
@@ -31,17 +30,38 @@ public static class SwaggerServiceExtension
                 "v1",
                 new OpenApiInfo
                 {
-                    Version = "v1",
                     Title = "Flight Rewards Management",
                     Description = "Our API uses a REST based design, leverages the JSON data format, and relies upon HTTPS for transport. We respond with meaningful HTTP response codes and if an error occurs, we include error details in the response body. API Documentation is at flightrewards.com/dev/docs",
                     Contact = new OpenApiContact
                     {
                         Name = "Flight Rewards",
                         Email = "devsupport@FlightRewards.com",
-                            Url = new Uri("https://www.flightrewards.com"),
-                    },
+                        Url = new Uri("https://www.flightrewards.com"),
+                    }
                 });
-
+            //authorization using Swagger (JWT)
+            config.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer",
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header,
+                Description = "Enter ‘Bearer’ [space] and then your valid token in the text input below." +
+                              "\r\n\r\nExample: \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\""
+            });
+            config.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {{
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
+                }});
             config.IncludeXmlComments(string.Format(@$"{AppDomain.CurrentDomain.BaseDirectory}{Path.DirectorySeparatorChar}SkySaver.WebApi.xml"));
         });
     }

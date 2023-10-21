@@ -8,13 +8,13 @@ using System.Text.Json.Serialization;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.Serialization;
-
+using SkySaver.Domain.Users;
 
 public class Flight : BaseEntity
 {
     public int FlightID { get; private set; }
 
-    public int UserID { get; private set; }
+    public Guid UserID { get; private set; }
 
     public string Departure { get; private set; }
 
@@ -24,20 +24,22 @@ public class Flight : BaseEntity
 
     public int PointsEarned { get; private set; }
 
+    public User User { get; set; }
 
     public static Flight Create(FlightForCreation flightForCreation)
     {
-        var newFlight = new Flight();
+        var newFlight = new Flight
+        {
+            FlightID = flightForCreation.FlightID,
+            UserID = flightForCreation.UserID,
+            Departure = flightForCreation.Departure,
+            Arrival = flightForCreation.Arrival,
+            FlightDate = flightForCreation.FlightDate,
+            PointsEarned = flightForCreation.PointsEarned
+        };
 
-        newFlight.FlightID = flightForCreation.FlightID;
-        newFlight.UserID = flightForCreation.UserID;
-        newFlight.Departure = flightForCreation.Departure;
-        newFlight.Arrival = flightForCreation.Arrival;
-        newFlight.FlightDate = flightForCreation.FlightDate;
-        newFlight.PointsEarned = flightForCreation.PointsEarned;
+        newFlight.QueueDomainEvent(new FlightCreated() { Flight = newFlight });
 
-        newFlight.QueueDomainEvent(new FlightCreated(){ Flight = newFlight });
-        
         return newFlight;
     }
 
@@ -50,9 +52,9 @@ public class Flight : BaseEntity
         FlightDate = flightForUpdate.FlightDate;
         PointsEarned = flightForUpdate.PointsEarned;
 
-        QueueDomainEvent(new FlightUpdated(){ Id = Id });
+        QueueDomainEvent(new FlightUpdated() { Id = Id });
         return this;
     }
-    
+
     protected Flight() { } // For EF + Mocking
 }

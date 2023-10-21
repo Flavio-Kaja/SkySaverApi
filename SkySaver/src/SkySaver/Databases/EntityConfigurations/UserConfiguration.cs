@@ -1,32 +1,20 @@
-namespace SkySaver.Databases.EntityConfigurations;
+namespace UserService.Databases.EntityConfigurations;
 
-using SkySaver.Domain.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using SkySaver.Databases.EntityConfigurations;
+using SkySaver.Domain.Users;
 
-public sealed class UserConfiguration : IEntityTypeConfiguration<User>
+public sealed class UserConfiguration : BaseEntityConfiguration<User>
 {
     /// <summary>
-    /// The database configuration for Users. 
+    /// The db configuration for the Users. 
     /// </summary>
-    public void Configure(EntityTypeBuilder<User> builder)
+    public override void Configure(EntityTypeBuilder<User> builder)
     {
-        // example for a simple 1:1 value object
-        // builder.Property(x => x.Percent)
-        //     .HasConversion(x => x.Value, x => new Percent(x))
-        //     .HasColumnName("percent");
-        
-        // example for a more complex value object
-        // builder.OwnsOne(x => x.PhysicalAddress, opts =>
-        // {
-        //     opts.Property(x => x.Line1).HasColumnName("physical_address_line1");
-        //     opts.Property(x => x.Line2).HasColumnName("physical_address_line2");
-        //     opts.Property(x => x.City).HasColumnName("physical_address_city");
-        //     opts.Property(x => x.State).HasColumnName("physical_address_state");
-        //     opts.Property(x => x.PostalCode).HasColumnName("physical_address_postal_code")
-        //         .HasConversion(x => x.Value, x => new PostalCode(x));
-        //     opts.Property(x => x.Country).HasColumnName("physical_address_country");
-        // }).Navigation(x => x.PhysicalAddress)
-        //     .IsRequired();
+        base.Configure(builder);
+        builder.Property(u => u.DailyGoal).IsRequired(true).HasDefaultValue(20);
+        builder.Property(u => u.LastName).IsRequired(true).HasMaxLength(200);
+        builder.Property(u => u.FirstName).IsRequired(true).HasMaxLength(200);
     }
 }

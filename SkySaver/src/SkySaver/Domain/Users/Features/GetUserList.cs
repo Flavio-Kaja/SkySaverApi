@@ -2,13 +2,12 @@ namespace SkySaver.Domain.Users.Features;
 
 using SkySaver.Domain.Users.Dtos;
 using SkySaver.Domain.Users.Services;
-using SkySaver.Wrappers;
-using SharedKernel.Exceptions;
-using Mappings;
+using SkySaver.Domain;
+using HeimGuard;
 using Microsoft.EntityFrameworkCore;
 using MediatR;
-using Sieve.Models;
-using Sieve.Services;
+using SkySaver.Wrappers;
+using UserService.Domain.Users.Mappings;
 
 public static class GetUserList
 {
@@ -25,26 +24,66 @@ public static class GetUserList
     public sealed class Handler : IRequestHandler<Query, PagedList<UserDto>>
     {
         private readonly IUserRepository _userRepository;
-        private readonly SieveProcessor _sieveProcessor;
 
-        public Handler(IUserRepository userRepository, SieveProcessor sieveProcessor)
+        public Handler(IUserRepository userRepository)
         {
             _userRepository = userRepository;
-            _sieveProcessor = sieveProcessor;
         }
 
         public async Task<PagedList<UserDto>> Handle(Query request, CancellationToken cancellationToken)
         {
+
             var collection = _userRepository.Query().AsNoTracking();
 
-            var sieveModel = new SieveModel
+            //filtering 
+            if (!string.IsNullOrEmpty(request.QueryParameters.FirstName))
             {
-                Sorts = request.QueryParameters.SortOrder ?? "-CreatedOn",
-                Filters = request.QueryParameters.Filters
-            };
+                collection = collection.Where(u => u.FirstName.ToLower().Contains(request.QueryParameters.FirstName));
+            }
+            if (!string.IsNullOrEmpty(request.QueryParameters.LastName))
+            {
+                collection = collection.Where(u => u.LastName.ToLower().Contains(request.QueryParameters.LastName));
+            }
+            if (!string.IsNullOrEmpty(request.QueryParameters.Email))
+            {
+                collection = collection.Where(u => u.Email.ToLower().Contains(request.QueryParameters.Email));
+            }
+            if (request.QueryParameters.MinDailyGoal != null)
+            {
+                collection = collection.Where(u => u.DailyGoal >= request.QueryParameters.MinDailyGoal);
+            }
+            if (request.QueryParameters.MaxDailyGoal != null)
+            {
+                collection = collection.Where(u => u.DailyGoal <= request.QueryParameters.MaxDailyGoal);
+            }
 
-            var appliedCollection = _sieveProcessor.Apply(sieveModel, collection);
-            var dtoCollection = appliedCollection.ToUserDtoQueryable();
+            // Ordering
+            if (StringComparer.OrdinalIgnoreCase.Equals(request.QueryParameters.SortBy, nameof(User.FirstName)))
+            {
+                collection = request.QueryParameters.Descending
+                    ? collection.OrderByDescending(user => user.FirstName)
+                    : collection.OrderBy(user => user.FirstName);
+            }
+            if (StringComparer.OrdinalIgnoreCase.Equals(request.QueryParameters.SortBy, nameof(User.LastName)))
+            {
+                collection = request.QueryParameters.Descending
+                    ? collection.OrderByDescending(user => user.LastName)
+                    : collection.OrderBy(user => user.LastName);
+            }
+            if (StringComparer.OrdinalIgnoreCase.Equals(request.QueryParameters.SortBy, nameof(User.Email)))
+            {
+                collection = request.QueryParameters.Descending
+                    ? collection.OrderByDescending(user => user.Email)
+                    : collection.OrderBy(user => user.Email);
+            }
+            if (StringComparer.OrdinalIgnoreCase.Equals(request.QueryParameters.SortBy, nameof(User.DailyGoal)))
+            {
+                collection = request.QueryParameters.Descending
+                    ? collection.OrderByDescending(user => user.DailyGoal)
+                    : collection.OrderBy(user => user.DailyGoal);
+            }
+
+            var dtoCollection = collection.ToUserDtoQueryable();
 
             return await PagedList<UserDto>.CreateAsync(dtoCollection,
                 request.QueryParameters.PageNumber,

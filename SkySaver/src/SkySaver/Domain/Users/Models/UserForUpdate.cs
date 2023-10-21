@@ -2,7 +2,7 @@ namespace SkySaver.Domain.Users.Models;
 
 public sealed class UserForUpdate
 {
-    public int UserID { get; set; }
+    public Guid UserID{ get; set; }
     public string Email { get; set; }
     public string FirstName { get; set; }
     public string LastName { get; set; }

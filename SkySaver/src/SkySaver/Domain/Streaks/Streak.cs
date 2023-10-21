@@ -14,12 +14,28 @@ public class Streak : BaseEntity
 {
     public int StreakID { get; private set; }
 
-    public int UserID { get; private set; }
+    public Guid UserID { get; private set; }
 
     public string StreakLevel { get; private set; }
 
     public bool IsActive { get; private set; }
+    public decimal Counter { get; set; }
+    public string Decimal { get; set; }
 
+    public Users.User User { get; set; }
+
+    public static Streak Create(Guid userId)
+    {
+        var newStreak = new Streak();
+
+        newStreak.UserID = userId;
+        newStreak.StreakLevel = StreakLevelEnum.None.ToString();
+        newStreak.IsActive = true;
+
+        newStreak.QueueDomainEvent(new StreakCreated() { Streak = newStreak });
+
+        return newStreak;
+    }
 
     public static Streak Create(StreakForCreation streakForCreation)
     {
@@ -30,8 +46,8 @@ public class Streak : BaseEntity
         newStreak.StreakLevel = streakForCreation.StreakLevel;
         newStreak.IsActive = streakForCreation.IsActive;
 
-        newStreak.QueueDomainEvent(new StreakCreated(){ Streak = newStreak });
-        
+        newStreak.QueueDomainEvent(new StreakCreated() { Streak = newStreak });
+
         return newStreak;
     }
 
@@ -42,9 +58,17 @@ public class Streak : BaseEntity
         StreakLevel = streakForUpdate.StreakLevel;
         IsActive = streakForUpdate.IsActive;
 
-        QueueDomainEvent(new StreakUpdated(){ Id = Id });
+        QueueDomainEvent(new StreakUpdated() { Id = Id });
         return this;
     }
-    
+
     protected Streak() { } // For EF + Mocking
+}
+enum StreakLevelEnum
+{
+    None = 0,
+    Bronze = 1,
+    Silver = 2,
+    Gold = 3,
+    Platinum = 4
 }

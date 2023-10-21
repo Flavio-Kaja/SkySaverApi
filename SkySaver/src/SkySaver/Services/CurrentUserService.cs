@@ -1,7 +1,6 @@
 namespace SkySaver.Services;
 
 using System.Security.Claims;
-
 public interface ICurrentUserService : ISkySaverScopedService
 {
     ClaimsPrincipal? User { get; }

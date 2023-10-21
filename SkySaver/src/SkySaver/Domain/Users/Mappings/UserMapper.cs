@@ -1,14 +1,12 @@
-namespace SkySaver.Domain.Users.Mappings;
+namespace UserService.Domain.Users.Mappings;
 
-using SkySaver.Domain.Users.Dtos;
-using SkySaver.Domain.Users.Models;
 using Riok.Mapperly.Abstractions;
+using SkySaver.Domain.Users;
+using SkySaver.Domain.Users.Dtos;
 
 [Mapper]
 public static partial class UserMapper
 {
-    public static partial UserForCreation ToUserForCreation(this UserForCreationDto userForCreationDto);
-    public static partial UserForUpdate ToUserForUpdate(this UserForUpdateDto userForUpdateDto);
     public static partial UserDto ToUserDto(this User user);
     public static partial IQueryable<UserDto> ToUserDtoQueryable(this IQueryable<User> user);
 }

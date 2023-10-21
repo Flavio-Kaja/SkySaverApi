@@ -15,36 +15,61 @@ using Sieve.Services;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using SkySaver.Domain.Users;
+using SkySaver.Domain.Roles;
+using SkySaver.Databases;
+using Microsoft.AspNetCore.Identity;
+using SkySaver.Extensions.Services;
+using Microsoft.AspNetCore.Mvc;
+using FluentValidation;
+using SkySaver.Domain.RolePermissions.Dtos;
+using SkySaver.Authentication.Models;
+using SkySaver.Domain.Users.Dtos;
 
 public static class WebAppServiceConfiguration
 {
     public static void ConfigureServices(this WebApplicationBuilder builder)
     {
+        builder.Services.AddHttpContextAccessor();
         builder.Services.AddTransient<IDateTimeProvider, DateTimeProvider>();
         builder.Services.AddSingleton(Log.Logger);
         builder.Services.AddProblemDetails(ProblemDetailsConfigurationExtension.ConfigureProblemDetails)
             .AddProblemDetailsConventions();
 
-        // TODO update CORS for your env
+
         builder.Services.AddCorsService("SkySaverCorsPolicy", builder.Environment);
         builder.OpenTelemetryRegistration(builder.Configuration, "SkySaver");
+        builder.Services.AddDistributedMemoryCache();
+        builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+        builder.Services.AddIdentity<User, Role>()
+               .AddEntityFrameworkStores<SkySaverDbContext>()
+               .AddDefaultTokenProviders();
         builder.Services.AddInfrastructure(builder.Environment, builder.Configuration);
-
+        //Added authentication
+        builder.Services.AddAppAuthentication(builder.Environment, builder.Configuration);
         builder.Services.AddControllers()
             .AddJsonOptions(o => o.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
-        builder.Services.AddApiVersioningExtension();
-
-        builder.Services.AddHttpContextAccessor();
+        builder.Services.AddApiVersioning(config =>
+        {
+            config.DefaultApiVersion = new ApiVersion(1, 0);
+            config.AssumeDefaultVersionWhenUnspecified = true;
+            config.ReportApiVersions = true;
+        });
         builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
         builder.Services.AddScoped<SieveProcessor>();
+        builder.Services.AddValidatorsFromAssemblyContaining<PostRolePermissionDto>();
 
-        // registers all services that inherit from your base service interface - ISkySaverScopedService
+        builder.Services.AddScoped<IValidator<PostRolePermissionDto>, PostRolePermissionDtoValidator>();
+        builder.Services.AddScoped<IValidator<UserLoginModel>, UserLoginValidator>();
+        builder.Services.AddScoped<IValidator<PostUserDto>, PostUserDtoValidator>();
+
+        builder.Services.AddMvc().AddFluentValidation(op => op.AutomaticValidationEnabled = false);
         builder.Services.AddBoundaryServices(Assembly.GetExecutingAssembly());
 
-        builder.Services.AddMvc();
 
         builder.Services.AddHealthChecks();
         builder.Services.AddSwaggerExtension(builder.Configuration);
+
     }
 
     /// <summary>

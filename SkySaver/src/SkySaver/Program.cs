@@ -32,6 +32,9 @@ app.UseCors("SkySaverCorsPolicy");
 
 app.UseSerilogRequestLogging();
 app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+
 
 app.UseEndpoints(endpoints =>
 {

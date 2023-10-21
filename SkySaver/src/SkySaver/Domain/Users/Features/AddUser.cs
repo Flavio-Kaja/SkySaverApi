@@ -1,46 +1,53 @@
-namespace SkySaver.Domain.Users.Features;
+namespace UserService.Domain.Users.Features;
 
-using SkySaver.Domain.Users.Services;
-using SkySaver.Domain.Users;
-using SkySaver.Domain.Users.Dtos;
-using SkySaver.Domain.Users.Models;
-using SkySaver.Services;
-using SharedKernel.Exceptions;
 using Mappings;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
+using SharedKernel.Exceptions;
+using SkySaver.Domain.Users.Dtos;
+using SkySaver.Domain.Users.Services;
+using SkySaver.Domain.Users;
 
 public static class AddUser
 {
     public sealed class Command : IRequest<UserDto>
     {
-        public readonly UserForCreationDto UserToAdd;
+        public readonly PostUserDto UserToAdd;
+        public readonly bool SkipPermissions;
 
-        public Command(UserForCreationDto userToAdd)
+        public Command(PostUserDto userToAdd, bool skipPermissions = false)
         {
             UserToAdd = userToAdd;
+            SkipPermissions = skipPermissions;
         }
     }
 
     public sealed class Handler : IRequestHandler<Command, UserDto>
     {
         private readonly IUserRepository _userRepository;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly UserManager<User> _userManager;
 
-        public Handler(IUserRepository userRepository, IUnitOfWork unitOfWork)
+        public Handler(IUserRepository userRepository, UserManager<User> userManager)
         {
             _userRepository = userRepository;
-            _unitOfWork = unitOfWork;
+            _userManager = userManager;
         }
 
         public async Task<UserDto> Handle(Command request, CancellationToken cancellationToken)
         {
-            var userToAdd = request.UserToAdd.ToUserForCreation();
-            var user = User.Create(userToAdd);
+            if (_userRepository.Query().Any(r => r.UserName == request.UserToAdd.Username))
+                throw new ValidationException("Username", $"A user with username {request.UserToAdd.Username} already exists");
+            var user = User.Create(request.UserToAdd);
+            var result = await _userManager.CreateAsync(user, request.UserToAdd.Password);
 
-            await _userRepository.Add(user, cancellationToken);
-            await _unitOfWork.CommitChanges(cancellationToken);
-
-            return user.ToUserDto();
+            if (result.Succeeded)
+            {
+                await _userManager.AddToRoleAsync(user, "User");
+                var userAdded = await _userRepository.GetById(user.Id, cancellationToken: cancellationToken);
+                return userAdded.ToUserDto();
+            }
+            else
+                throw new Exception("User Creation Failed");
         }
     }
 }

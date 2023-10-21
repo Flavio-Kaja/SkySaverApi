@@ -17,8 +17,15 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Query;
+using SkySaver.Domain.Roles;
+using SkySaver.Domain.Users;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using SkySaver.Domain.RolePermissions;
+using SkySaver.Databases.EntityConfigurations;
+using global::Domain.Users;
+using UserService.Databases.EntityConfigurations;
 
-public sealed class SkySaverDbContext : DbContext
+public sealed class SkySaverDbContext : IdentityDbContext<User, Role, Guid>
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IMediator _mediator;
@@ -33,7 +40,10 @@ public sealed class SkySaverDbContext : DbContext
     }
 
     #region DbSet Region - Do Not Delete
+    public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<Role> Roles { get; set; }
+    public DbSet<RolePermission> RolePermissions { get; set; }
     public DbSet<Flight> Flights { get; set; }
     public DbSet<Streak> Streaks { get; set; }
     public DbSet<PurchasableGood> PurchasableGoods { get; set; }
@@ -50,8 +60,11 @@ public sealed class SkySaverDbContext : DbContext
                 https://github.com/dotnet/efcore/issues/10275
         */
 
-        #region Entity Database Config Region - Only delete if you don't want to automatically add configurations
+        #region Entity Database Config Region - Only delete if you don't want to automatically add configurations      
         modelBuilder.ApplyConfiguration(new UserConfiguration());
+        modelBuilder.ApplyConfiguration(new RoleConfiguration());
+        modelBuilder.ApplyConfiguration(new UserRoleConfiguration());
+        modelBuilder.ApplyConfiguration(new RolePermissionConfiguration());
         modelBuilder.ApplyConfiguration(new FlightConfiguration());
         modelBuilder.ApplyConfiguration(new StreakConfiguration());
         modelBuilder.ApplyConfiguration(new PurchasableGoodConfiguration());
@@ -75,7 +88,7 @@ public sealed class SkySaverDbContext : DbContext
         await _dispatchDomainEvents();
         return result;
     }
-    
+
     private async Task _dispatchDomainEvents()
     {
         var domainEventEntities = ChangeTracker.Entries<BaseEntity>()
@@ -91,7 +104,7 @@ public sealed class SkySaverDbContext : DbContext
                 await _mediator.Publish(entityDomainEvent);
         }
     }
-        
+
     private void UpdateAuditFields()
     {
         var now = _dateTimeProvider.DateTimeUtcNow;
@@ -107,7 +120,7 @@ public sealed class SkySaverDbContext : DbContext
                 case EntityState.Modified:
                     entry.Entity.UpdateModifiedProperties(now, _currentUserService?.UserId);
                     break;
-                
+
                 case EntityState.Deleted:
                     entry.State = EntityState.Modified;
                     entry.Entity.UpdateModifiedProperties(now, _currentUserService?.UserId);

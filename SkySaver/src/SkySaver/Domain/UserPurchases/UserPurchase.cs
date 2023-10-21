@@ -14,11 +14,16 @@ public class UserPurchase : BaseEntity
 {
     public int PurchaseID { get; private set; }
 
-    public int UserID { get; private set; }
+    public Guid UserID { get; private set; }
 
     public int GoodID { get; private set; }
 
     public DateTime PurchaseDate { get; private set; }
+
+    public SkySaver.Domain.Users.User User { get; set; }
+
+
+    public PurchasableGoods.PurchasableGood PurchasableGood { get; set; }
 
 
     public static UserPurchase Create(UserPurchaseForCreation userPurchaseForCreation)
@@ -30,8 +35,8 @@ public class UserPurchase : BaseEntity
         newUserPurchase.GoodID = userPurchaseForCreation.GoodID;
         newUserPurchase.PurchaseDate = userPurchaseForCreation.PurchaseDate;
 
-        newUserPurchase.QueueDomainEvent(new UserPurchaseCreated(){ UserPurchase = newUserPurchase });
-        
+        newUserPurchase.QueueDomainEvent(new UserPurchaseCreated() { UserPurchase = newUserPurchase });
+
         return newUserPurchase;
     }
 
@@ -42,9 +47,9 @@ public class UserPurchase : BaseEntity
         GoodID = userPurchaseForUpdate.GoodID;
         PurchaseDate = userPurchaseForUpdate.PurchaseDate;
 
-        QueueDomainEvent(new UserPurchaseUpdated(){ Id = Id });
+        QueueDomainEvent(new UserPurchaseUpdated() { Id = Id });
         return this;
     }
-    
+
     protected UserPurchase() { } // For EF + Mocking
 }

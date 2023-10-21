@@ -4,6 +4,11 @@ using SharedKernel.Dtos;
 
 public sealed class UserParametersDto : BasePaginationParameters
 {
-    public string Filters { get; set; }
-    public string SortOrder { get; set; }
+    public string Email { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public int? MinDailyGoal { get; set; }
+    public int? MaxDailyGoal { get; set; }
+    public string SortBy { get; set; }
+    public bool Descending { get; set; }
 }
