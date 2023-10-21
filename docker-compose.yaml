@@ -1,0 +1,33 @@
+version: '3.7'
+
+services:
+  skysaver-db:
+    image: postgres
+    restart: always
+    ports:
+      - '59904:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: dev_skysaver
+    volumes:
+      - skysaver-data:/var/lib/postgresql/data
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+#    port mappings: https://www.jaegertracing.io/docs/1.32/getting-started/
+    ports:
+      - "59911:5775/udp"
+      - "59910:6831/udp"
+      - "59912:6832/udp"
+      - "59913:5778"
+      - "59914:16686"
+      - "59915:14250"
+      - "59916:14268"
+      - "59917:14269"
+      - "59918:9411"
+
+        
+volumes:
+  # compose volumes marker - do not delete
+  skysaver-data:
