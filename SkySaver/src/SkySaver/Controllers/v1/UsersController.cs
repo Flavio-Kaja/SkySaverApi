@@ -98,7 +98,7 @@ public sealed class UsersController : ControllerBase
     /// <summary>
     /// Creates a new User record.
     /// </summary>
-    [Authorize(Policy = Permissions.CanAddUsers)]
+    [AllowAnonymous]
     [HttpPost(Name = "AddUser")]
     public async Task<ActionResult<UserDto>> AddUser([FromBody] PostUserDto userForCreation)
     {

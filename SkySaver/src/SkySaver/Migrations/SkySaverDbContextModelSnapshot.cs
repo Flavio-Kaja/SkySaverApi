@@ -181,13 +181,13 @@ namespace SkySaver.Migrations
                         .HasColumnType("text")
                         .HasColumnName("departure");
 
+                    b.Property<int>("Distance")
+                        .HasColumnType("integer")
+                        .HasColumnName("distance");
+
                     b.Property<DateTime>("FlightDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("flight_date");
-
-                    b.Property<int>("FlightID")
-                        .HasColumnType("integer")
-                        .HasColumnName("flight_id");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
@@ -237,9 +237,9 @@ namespace SkySaver.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
-                    b.Property<int>("GoodID")
-                        .HasColumnType("integer")
-                        .HasColumnName("good_id");
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("image_url");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
@@ -379,10 +379,6 @@ namespace SkySaver.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
-                    b.Property<int>("HuntID")
-                        .HasColumnType("integer")
-                        .HasColumnName("hunt_id");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
@@ -451,10 +447,6 @@ namespace SkySaver.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_modified_on");
 
-                    b.Property<int>("StreakID")
-                        .HasColumnType("integer")
-                        .HasColumnName("streak_id");
-
                     b.Property<string>("StreakLevel")
                         .HasColumnType("text")
                         .HasColumnName("streak_level");
@@ -467,6 +459,7 @@ namespace SkySaver.Migrations
                         .HasName("pk_streaks");
 
                     b.HasIndex("UserID")
+                        .IsUnique()
                         .HasDatabaseName("ix_streaks_user_id");
 
                     b.ToTable("streaks", (string)null);
@@ -475,7 +468,6 @@ namespace SkySaver.Migrations
             modelBuilder.Entity("SkySaver.Domain.UserPurchases.UserPurchase", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -487,8 +479,8 @@ namespace SkySaver.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
-                    b.Property<int>("GoodID")
-                        .HasColumnType("integer")
+                    b.Property<Guid>("GoodID")
+                        .HasColumnType("uuid")
                         .HasColumnName("good_id");
 
                     b.Property<bool>("IsDeleted")
@@ -503,17 +495,9 @@ namespace SkySaver.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_modified_on");
 
-                    b.Property<Guid?>("PurchasableGoodId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("purchasable_good_id");
-
                     b.Property<DateTime>("PurchaseDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("purchase_date");
-
-                    b.Property<int>("PurchaseID")
-                        .HasColumnType("integer")
-                        .HasColumnName("purchase_id");
 
                     b.Property<Guid>("UserID")
                         .HasColumnType("uuid")
@@ -521,9 +505,6 @@ namespace SkySaver.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_user_purchases");
-
-                    b.HasIndex("PurchasableGoodId")
-                        .HasDatabaseName("ix_user_purchases_purchasable_good_id");
 
                     b.HasIndex("UserID")
                         .HasDatabaseName("ix_user_purchases_user_id");
@@ -636,6 +617,10 @@ namespace SkySaver.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("sky_points");
 
+                    b.Property<int?>("StreakId")
+                        .HasColumnType("integer")
+                        .HasColumnName("streak_id");
+
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean")
                         .HasColumnName("two_factor_enabled");
@@ -711,7 +696,7 @@ namespace SkySaver.Migrations
             modelBuilder.Entity("SkySaver.Domain.Flights.Flight", b =>
                 {
                     b.HasOne("SkySaver.Domain.Users.User", "User")
-                        .WithMany()
+                        .WithMany("Flight")
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -735,8 +720,8 @@ namespace SkySaver.Migrations
             modelBuilder.Entity("SkySaver.Domain.Streaks.Streak", b =>
                 {
                     b.HasOne("SkySaver.Domain.Users.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID")
+                        .WithOne("Streak")
+                        .HasForeignKey("SkySaver.Domain.Streaks.Streak", "UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_streaks_asp_net_users_user_id");
@@ -747,12 +732,14 @@ namespace SkySaver.Migrations
             modelBuilder.Entity("SkySaver.Domain.UserPurchases.UserPurchase", b =>
                 {
                     b.HasOne("SkySaver.Domain.PurchasableGoods.PurchasableGood", "PurchasableGood")
-                        .WithMany()
-                        .HasForeignKey("PurchasableGoodId")
+                        .WithMany("UserPurchases")
+                        .HasForeignKey("Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
                         .HasConstraintName("fk_user_purchases_purchasable_goods_purchasable_good_id");
 
                     b.HasOne("SkySaver.Domain.Users.User", "User")
-                        .WithMany()
+                        .WithMany("UserPurchase")
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -784,6 +771,11 @@ namespace SkySaver.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SkySaver.Domain.PurchasableGoods.PurchasableGood", b =>
+                {
+                    b.Navigation("UserPurchases");
+                });
+
             modelBuilder.Entity("SkySaver.Domain.Roles.Role", b =>
                 {
                     b.Navigation("UserRoles");
@@ -791,6 +783,12 @@ namespace SkySaver.Migrations
 
             modelBuilder.Entity("SkySaver.Domain.Users.User", b =>
                 {
+                    b.Navigation("Flight");
+
+                    b.Navigation("Streak");
+
+                    b.Navigation("UserPurchase");
+
                     b.Navigation("UserRoles");
                 });
 #pragma warning restore 612, 618

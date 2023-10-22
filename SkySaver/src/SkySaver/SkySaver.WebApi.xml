@@ -14,6 +14,16 @@
             Command handler
             </summary>
         </member>
+        <member name="T:SkySaver.Authentication.Features.GetDataCommand">
+            <summary>
+            User login command.
+            </summary>
+        </member>
+        <member name="T:SkySaver.Authentication.Features.GetDataCommandHandler">
+            <summary>
+            Command handler
+            </summary>
+        </member>
         <member name="P:SkySaver.Authentication.Models.AuthenticatedUser.Id">
             <summary>
             Gets or sets the identifier
@@ -412,16 +422,16 @@
             Registers all services in the assembly of the given interface.
             </summary>
         </member>
-        <member name="T:SkySaver.Migrations.MigrationName">
+        <member name="T:SkySaver.Migrations.Init">
             <inheritdoc />
         </member>
-        <member name="M:SkySaver.Migrations.MigrationName.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+        <member name="M:SkySaver.Migrations.Init.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
             <inheritdoc />
         </member>
-        <member name="M:SkySaver.Migrations.MigrationName.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+        <member name="M:SkySaver.Migrations.Init.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
             <inheritdoc />
         </member>
-        <member name="M:SkySaver.Migrations.MigrationName.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+        <member name="M:SkySaver.Migrations.Init.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
         <member name="M:UserService.Databases.EntityConfigurations.UserConfiguration.Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder{SkySaver.Domain.Users.User})">

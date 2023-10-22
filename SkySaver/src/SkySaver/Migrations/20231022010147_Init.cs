@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace SkySaver.Migrations
 {
     /// <inheritdoc />
-    public partial class MigrationName : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -39,6 +39,7 @@ namespace SkySaver.Migrations
                     firstname = table.Column<string>(name: "first_name", type: "character varying(200)", maxLength: 200, nullable: false),
                     lastname = table.Column<string>(name: "last_name", type: "character varying(200)", maxLength: 200, nullable: false),
                     dailygoal = table.Column<int>(name: "daily_goal", type: "integer", nullable: false, defaultValue: 20),
+                    streakid = table.Column<int>(name: "streak_id", type: "integer", nullable: true),
                     createdon = table.Column<DateTime>(name: "created_on", type: "timestamp with time zone", nullable: false),
                     createdby = table.Column<string>(name: "created_by", type: "character varying(200)", maxLength: 200, nullable: true),
                     lastmodifiedon = table.Column<DateTime>(name: "last_modified_on", type: "timestamp with time zone", nullable: true),
@@ -70,9 +71,9 @@ namespace SkySaver.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    goodid = table.Column<int>(name: "good_id", type: "integer", nullable: false),
                     name = table.Column<string>(type: "text", nullable: true),
                     description = table.Column<string>(type: "text", nullable: true),
+                    imageurl = table.Column<string>(name: "image_url", type: "text", nullable: true),
                     pointscost = table.Column<int>(name: "points_cost", type: "integer", nullable: false),
                     createdon = table.Column<DateTime>(name: "created_on", type: "timestamp with time zone", nullable: false),
                     createdby = table.Column<string>(name: "created_by", type: "text", nullable: true),
@@ -215,11 +216,11 @@ namespace SkySaver.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    flightid = table.Column<int>(name: "flight_id", type: "integer", nullable: false),
                     userid = table.Column<Guid>(name: "user_id", type: "uuid", nullable: false),
                     departure = table.Column<string>(type: "text", nullable: true),
                     arrival = table.Column<string>(type: "text", nullable: true),
                     flightdate = table.Column<DateTime>(name: "flight_date", type: "timestamp with time zone", nullable: false),
+                    distance = table.Column<int>(type: "integer", nullable: false),
                     pointsearned = table.Column<int>(name: "points_earned", type: "integer", nullable: false),
                     createdon = table.Column<DateTime>(name: "created_on", type: "timestamp with time zone", nullable: false),
                     createdby = table.Column<string>(name: "created_by", type: "text", nullable: true),
@@ -243,7 +244,6 @@ namespace SkySaver.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    huntid = table.Column<int>(name: "hunt_id", type: "integer", nullable: false),
                     userid = table.Column<Guid>(name: "user_id", type: "uuid", nullable: false),
                     pointsearned = table.Column<int>(name: "points_earned", type: "integer", nullable: false),
                     completiondate = table.Column<DateTime>(name: "completion_date", type: "timestamp with time zone", nullable: false),
@@ -269,7 +269,6 @@ namespace SkySaver.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    streakid = table.Column<int>(name: "streak_id", type: "integer", nullable: false),
                     userid = table.Column<Guid>(name: "user_id", type: "uuid", nullable: false),
                     streaklevel = table.Column<string>(name: "streak_level", type: "text", nullable: true),
                     isactive = table.Column<bool>(name: "is_active", type: "boolean", nullable: false),
@@ -297,11 +296,9 @@ namespace SkySaver.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    purchaseid = table.Column<int>(name: "purchase_id", type: "integer", nullable: false),
                     userid = table.Column<Guid>(name: "user_id", type: "uuid", nullable: false),
-                    goodid = table.Column<int>(name: "good_id", type: "integer", nullable: false),
+                    goodid = table.Column<Guid>(name: "good_id", type: "uuid", nullable: false),
                     purchasedate = table.Column<DateTime>(name: "purchase_date", type: "timestamp with time zone", nullable: false),
-                    purchasablegoodid = table.Column<Guid>(name: "purchasable_good_id", type: "uuid", nullable: true),
                     createdon = table.Column<DateTime>(name: "created_on", type: "timestamp with time zone", nullable: false),
                     createdby = table.Column<string>(name: "created_by", type: "text", nullable: true),
                     lastmodifiedon = table.Column<DateTime>(name: "last_modified_on", type: "timestamp with time zone", nullable: true),
@@ -319,9 +316,10 @@ namespace SkySaver.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_user_purchases_purchasable_goods_purchasable_good_id",
-                        column: x => x.purchasablegoodid,
+                        column: x => x.id,
                         principalTable: "purchasable_goods",
-                        principalColumn: "id");
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -374,12 +372,8 @@ namespace SkySaver.Migrations
             migrationBuilder.CreateIndex(
                 name: "ix_streaks_user_id",
                 table: "streaks",
-                column: "user_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_user_purchases_purchasable_good_id",
-                table: "user_purchases",
-                column: "purchasable_good_id");
+                column: "user_id",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_user_purchases_user_id",

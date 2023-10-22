@@ -20,11 +20,11 @@ public static class Permissions
     public const string CanGetPermissions = "CanGetPermissions";
 
 
-    public const string CanCreateJourney = "CanCreateJourney";
-    public const string CanReadJourney = "CanReadJourney";
-    public const string CanUpdateJourney = "CanUpdateJourney";
-    public const string CanDeleteJourney = "CanDeleteJourney";
-    public const string CanFilterJourneys = "CanFilterJourneys";
+    public const string CanCreateProduct = "CanCreateProduct";
+    public const string CanReadProduct = "CanReadProduc";
+    public const string CanUpdateProduct = "CanUpdateProduct";
+    public const string CanDeleteProduct = "CanDeleteProduct";
+    public const string CanFilterProducts = "CanFilterProducts";
 
 
     public const string CanCreateTransportation = "CanCreateTransportation";
@@ -39,7 +39,7 @@ public static class Permissions
     {
         return new List<string>
         {
-            CanCreateJourney,CanReadJourney,CanUpdateJourney,CanDeleteJourney
+            CanCreateProduct,CanReadProduct,CanUpdateProduct,CanDeleteProduct
         };
     }
     public static List<string> List()

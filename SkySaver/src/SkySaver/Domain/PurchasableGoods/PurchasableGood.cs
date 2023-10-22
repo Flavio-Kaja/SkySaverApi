@@ -12,39 +12,40 @@ using System.Runtime.Serialization;
 
 public class PurchasableGood : BaseEntity
 {
-    public int GoodID { get; private set; }
-
     public string Name { get; private set; }
 
     public string Description { get; private set; }
 
+    public string ImageUrl { get; private set; }
+
     public int PointsCost { get; private set; }
 
+    [JsonIgnore]
+    [IgnoreDataMember]
+    public virtual ICollection<UserPurchases.UserPurchase>? UserPurchases { get; private set; } = new List<UserPurchases.UserPurchase>();
 
     public static PurchasableGood Create(PurchasableGoodForCreation purchasableGoodForCreation)
     {
         var newPurchasableGood = new PurchasableGood();
 
-        newPurchasableGood.GoodID = purchasableGoodForCreation.GoodID;
         newPurchasableGood.Name = purchasableGoodForCreation.Name;
         newPurchasableGood.Description = purchasableGoodForCreation.Description;
         newPurchasableGood.PointsCost = purchasableGoodForCreation.PointsCost;
 
-        newPurchasableGood.QueueDomainEvent(new PurchasableGoodCreated(){ PurchasableGood = newPurchasableGood });
-        
+        newPurchasableGood.QueueDomainEvent(new PurchasableGoodCreated() { PurchasableGood = newPurchasableGood });
+
         return newPurchasableGood;
     }
 
     public PurchasableGood Update(PurchasableGoodForUpdate purchasableGoodForUpdate)
     {
-        GoodID = purchasableGoodForUpdate.GoodID;
         Name = purchasableGoodForUpdate.Name;
         Description = purchasableGoodForUpdate.Description;
         PointsCost = purchasableGoodForUpdate.PointsCost;
 
-        QueueDomainEvent(new PurchasableGoodUpdated(){ Id = Id });
+        QueueDomainEvent(new PurchasableGoodUpdated() { Id = Id });
         return this;
     }
-    
+
     protected PurchasableGood() { } // For EF + Mocking
 }

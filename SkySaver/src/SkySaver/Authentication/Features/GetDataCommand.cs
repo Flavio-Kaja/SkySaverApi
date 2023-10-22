@@ -20,22 +20,22 @@ namespace SkySaver.Authentication.Features
     /// <summary>
     /// User login command.
     /// </summary>
-    public class GetDataCommand : IRequest<GetDataResponseModel>
+    public class UserLoginCommand : IRequest<LoginResponseModel>
     {
-        public readonly Guid UserId;
-        public GetDataCommand(Guid userId)
+        public readonly UserLoginModel userLoginModel;
+        public UserLoginCommand(UserLoginModel userLoginModel)
         {
-            this.UserId = userId;
+            this.userLoginModel = userLoginModel;
         }
     }
 
     /// <summary>
     /// Command handler
     /// </summary>
-    public class GetDataCommandHandler : IRequestHandler<GetDataCommand, GetDataResponseModel>
+    public class UserLoginCommandHandler : IRequestHandler<UserLoginCommand, LoginResponseModel>
     {
         private readonly IAuthenticationService _authenticationService;
-        private readonly ILogger<GetDataCommandHandler> _logger;
+        private readonly ILogger<UserLoginCommandHandler> _logger;
         private readonly UserManager<User> _userManager;
         private readonly IFlightRepository flightRepository;
         private readonly IStreakRepository _streakRepository;
@@ -43,8 +43,8 @@ namespace SkySaver.Authentication.Features
         private readonly IPurchasableGoodRepository _purchasableGoodRepository;
         private readonly IUserRepository _userRepository;
 
-        public GetDataCommandHandler(IAuthenticationService authenticationService,
-            ILogger<GetDataCommandHandler> logger, IUserRepository userRepository, UserManager<User> userManager, RoleManager<Role> roleManager, IStreakRepository streakRepository, IFlightRepository flightRepository, IPurchasableGoodRepository purchasableGoodRepository)
+        public UserLoginCommandHandler(IAuthenticationService authenticationService,
+            ILogger<UserLoginCommandHandler> logger, IUserRepository userRepository, UserManager<User> userManager, RoleManager<Role> roleManager, IStreakRepository streakRepository, IFlightRepository flightRepository, IPurchasableGoodRepository purchasableGoodRepository)
         {
             _authenticationService = authenticationService;
             _logger = logger;
@@ -57,14 +57,18 @@ namespace SkySaver.Authentication.Features
             _purchasableGoodRepository = purchasableGoodRepository;
         }
 
-        public async Task<GetDataResponseModel> Handle(GetDataCommand command, CancellationToken cancellationToken)
+        public async Task<LoginResponseModel> Handle(UserLoginCommand command, CancellationToken cancellationToken)
         {
             try
             {
-                var user = await _userRepository.Query().Include(u => u.UserRoles).FirstOrDefaultAsync(u => u.Id == command.UserId, cancellationToken: cancellationToken);
+                var user = await _userRepository.Query().Include(u => u.UserRoles).FirstOrDefaultAsync(u => u.Email == command.userLoginModel.Email, cancellationToken: cancellationToken);
                 if (user is null)
                     throw new NotFoundException();
 
+                var passwordCheckResult = await _userManager.CheckPasswordAsync(user, command.userLoginModel.Password);
+
+                if (!passwordCheckResult)
+                    throw new NotFoundException("Invalid username or password.");
                 var streaks = await _streakRepository.Query().FirstOrDefaultAsync(s => s.UserID == user.Id);
                 IQueryable<Domain.Flights.Flight> flights1 = flightRepository.Query().Where(c => c.UserID == user.Id);
                 List<Domain.Flights.Dtos.FlightDto> flights = flights1.ToFlightDtoQueryable().ToList();
@@ -73,7 +77,7 @@ namespace SkySaver.Authentication.Features
                 IQueryable<Domain.PurchasableGoods.PurchasableGood> locked = _purchasableGoodRepository.Query().Where(u => u.PointsCost >= 10000);
                 List<Domain.PurchasableGoods.Dtos.PurchasableGoodDto> lockedProducts = locked.ToPurchasableGoodDtoQueryable().ToList();
                 var token = await _authenticationService.AuthenticateAsync(user, cancellationToken);
-                return new GetDataResponseModel(user.Id, streaks?.StreakLevel ?? "None", user.SkyPoints, flights, user.FullName, unlockedProducts, lockedProducts);
+                return new LoginResponseModel(token, user.Id, streaks?.StreakLevel ?? "None", user.SkyPoints, flights, user.FullName, unlockedProducts, lockedProducts);
             }
             catch (Exception e)
             {
@@ -82,25 +86,5 @@ namespace SkySaver.Authentication.Features
             }
         }
 
-    }
-    public class GetDataResponseModel
-    {
-        public GetDataResponseModel(Guid userId, string streak, int skyPoints, List<Domain.Flights.Dtos.FlightDto> flights, string name,
-        List<Domain.PurchasableGoods.Dtos.PurchasableGoodDto> unlockedGoods, List<Domain.PurchasableGoods.Dtos.PurchasableGoodDto> lockedGoods)
-        {
-            UserId = userId;
-            Streak = streak;
-            this.SkyPoints = skyPoints;
-            UnlockedGoods = unlockedGoods;
-            LockedGoods = lockedGoods;
-            this.Flights = flights;
-        }
-        public Guid UserId { get; set; }
-        public string Name { get; set; }
-        public int SkyPoints { get; set; }
-        public string Streak { get; set; }
-        public List<Domain.Flights.Dtos.FlightDto> Flights { get; set; }
-        public List<Domain.PurchasableGoods.Dtos.PurchasableGoodDto> UnlockedGoods { get; set; }
-        public List<Domain.PurchasableGoods.Dtos.PurchasableGoodDto> LockedGoods { get; set; }
     }
 }

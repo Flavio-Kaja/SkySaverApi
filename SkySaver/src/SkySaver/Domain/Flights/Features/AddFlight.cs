@@ -8,6 +8,8 @@ using SkySaver.Services;
 using SharedKernel.Exceptions;
 using Mappings;
 using MediatR;
+using SkySaver.Domain.UserPurchases.Services;
+using SkySaver.Domain.Users.Services;
 
 public static class AddFlight
 {
@@ -24,6 +26,7 @@ public static class AddFlight
     public sealed class Handler : IRequestHandler<Command, FlightDto>
     {
         private readonly IFlightRepository _flightRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
 
         public Handler(IFlightRepository flightRepository, IUnitOfWork unitOfWork)
@@ -36,6 +39,14 @@ public static class AddFlight
         {
             var flightToAdd = request.FlightToAdd.ToFlightForCreation();
             var flight = Flight.Create(flightToAdd);
+            flight.PointsEarned = flight.Distance * 2;
+            //Get the user 
+            var user = await _userRepository.GetById(request.FlightToAdd.UserID, cancellationToken: cancellationToken);
+            if (user is null)
+                throw new NotFoundException("User not found");
+
+            user.SkyPoints += flight.PointsEarned;
+            _userRepository.Update(user);
 
             await _flightRepository.Add(flight, cancellationToken);
             await _unitOfWork.CommitChanges(cancellationToken);

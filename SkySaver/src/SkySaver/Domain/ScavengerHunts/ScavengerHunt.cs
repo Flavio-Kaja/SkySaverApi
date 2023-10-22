@@ -12,8 +12,6 @@ using System.Runtime.Serialization;
 
 public class ScavengerHunt : BaseEntity
 {
-    public int HuntID { get; private set; }
-
     public Guid UserID { get; private set; }
 
     public int PointsEarned { get; private set; }
@@ -26,7 +24,6 @@ public class ScavengerHunt : BaseEntity
     {
         var newScavengerHunt = new ScavengerHunt();
 
-        newScavengerHunt.HuntID = scavengerHuntForCreation.HuntID;
         newScavengerHunt.UserID = scavengerHuntForCreation.UserID;
         newScavengerHunt.PointsEarned = scavengerHuntForCreation.PointsEarned;
         newScavengerHunt.CompletionDate = scavengerHuntForCreation.CompletionDate;
@@ -38,7 +35,6 @@ public class ScavengerHunt : BaseEntity
 
     public ScavengerHunt Update(ScavengerHuntForUpdate scavengerHuntForUpdate)
     {
-        HuntID = scavengerHuntForUpdate.HuntID;
         UserID = scavengerHuntForUpdate.UserID;
         PointsEarned = scavengerHuntForUpdate.PointsEarned;
         CompletionDate = scavengerHuntForUpdate.CompletionDate;

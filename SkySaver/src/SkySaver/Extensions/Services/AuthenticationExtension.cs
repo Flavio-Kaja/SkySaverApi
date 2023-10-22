@@ -54,11 +54,10 @@ public static class AuthenticationExtension
             options.AddPolicy(Permissions.CanAddUserRoles, policy => policy.RequireClaim(ClaimTypes.AuthorizationDecision, Permissions.CanAddUserRoles));
             options.AddPolicy(Permissions.CanGetRoles, policy => policy.RequireClaim(ClaimTypes.AuthorizationDecision, Permissions.CanGetRoles));
             options.AddPolicy(Permissions.CanGetPermissions, policy => policy.RequireClaim(ClaimTypes.AuthorizationDecision, Permissions.CanGetPermissions));
-            options.AddPolicy(Permissions.CanCreateJourney, policy => policy.RequireClaim(ClaimTypes.AuthorizationDecision, Permissions.CanCreateJourney));
-            options.AddPolicy(Permissions.CanReadJourney, policy => policy.RequireClaim(ClaimTypes.AuthorizationDecision, Permissions.CanReadJourney));
-            options.AddPolicy(Permissions.CanUpdateJourney, policy => policy.RequireClaim(ClaimTypes.AuthorizationDecision, Permissions.CanUpdateJourney));
-            options.AddPolicy(Permissions.CanDeleteJourney, policy => policy.RequireClaim(ClaimTypes.AuthorizationDecision, Permissions.CanDeleteJourney));
-            options.AddPolicy(Permissions.CanFilterJourneys, policy => policy.RequireClaim(ClaimTypes.AuthorizationDecision, Permissions.CanFilterJourneys));
+            options.AddPolicy(Permissions.CanCreateProduct, policy => policy.RequireClaim(ClaimTypes.AuthorizationDecision, Permissions.CanCreateProduct));
+            options.AddPolicy(Permissions.CanReadProduct, policy => policy.RequireClaim(ClaimTypes.AuthorizationDecision, Permissions.CanReadProduct));
+            options.AddPolicy(Permissions.CanUpdateProduct, policy => policy.RequireClaim(ClaimTypes.AuthorizationDecision, Permissions.CanUpdateProduct));
+            options.AddPolicy(Permissions.CanDeleteProduct, policy => policy.RequireClaim(ClaimTypes.AuthorizationDecision, Permissions.CanDeleteProduct));
             options.AddPolicy(Permissions.CanCreateTransportation, policy => policy.RequireClaim(ClaimTypes.AuthorizationDecision, Permissions.CanCreateTransportation));
             options.AddPolicy(Permissions.CanReadTransportation, policy => policy.RequireClaim(ClaimTypes.AuthorizationDecision, Permissions.CanReadTransportation));
             options.AddPolicy(Permissions.CanUpdateTransportation, policy => policy.RequireClaim(ClaimTypes.AuthorizationDecision, Permissions.CanUpdateTransportation));

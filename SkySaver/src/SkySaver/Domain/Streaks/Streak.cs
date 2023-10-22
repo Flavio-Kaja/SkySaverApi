@@ -12,8 +12,6 @@ using System.Runtime.Serialization;
 
 public class Streak : BaseEntity
 {
-    public int StreakID { get; private set; }
-
     public Guid UserID { get; private set; }
 
     public string StreakLevel { get; private set; }
@@ -41,7 +39,6 @@ public class Streak : BaseEntity
     {
         var newStreak = new Streak();
 
-        newStreak.StreakID = streakForCreation.StreakID;
         newStreak.UserID = streakForCreation.UserID;
         newStreak.StreakLevel = streakForCreation.StreakLevel;
         newStreak.IsActive = streakForCreation.IsActive;
@@ -53,7 +50,6 @@ public class Streak : BaseEntity
 
     public Streak Update(StreakForUpdate streakForUpdate)
     {
-        StreakID = streakForUpdate.StreakID;
         UserID = streakForUpdate.UserID;
         StreakLevel = streakForUpdate.StreakLevel;
         IsActive = streakForUpdate.IsActive;

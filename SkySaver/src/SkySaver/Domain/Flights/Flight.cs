@@ -12,7 +12,6 @@ using SkySaver.Domain.Users;
 
 public class Flight : BaseEntity
 {
-    public int FlightID { get; private set; }
 
     public Guid UserID { get; private set; }
 
@@ -22,7 +21,9 @@ public class Flight : BaseEntity
 
     public DateTime FlightDate { get; private set; }
 
-    public int PointsEarned { get; private set; }
+    public int Distance { get; set; }
+
+    public int PointsEarned { get; set; }
 
     public User User { get; set; }
 
@@ -30,7 +31,6 @@ public class Flight : BaseEntity
     {
         var newFlight = new Flight
         {
-            FlightID = flightForCreation.FlightID,
             UserID = flightForCreation.UserID,
             Departure = flightForCreation.Departure,
             Arrival = flightForCreation.Arrival,
@@ -45,7 +45,6 @@ public class Flight : BaseEntity
 
     public Flight Update(FlightForUpdate flightForUpdate)
     {
-        FlightID = flightForUpdate.FlightID;
         UserID = flightForUpdate.UserID;
         Departure = flightForUpdate.Departure;
         Arrival = flightForUpdate.Arrival;

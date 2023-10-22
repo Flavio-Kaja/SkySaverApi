@@ -4,6 +4,8 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SkySaver.Authentication.Features;
 using SkySaver.Authentication.Models;
+using SkySaver.Domain.ScavengerHunts.Dtos;
+using SkySaver.Domain.ScavengerHunts.Features;
 
 namespace SkySaver.Controllers.v1
 {
@@ -30,6 +32,16 @@ namespace SkySaver.Controllers.v1
 
             return Ok(result);
         }
+
+        [HttpPost("{id:guid}", Name = "GetData")]
+        public async Task<IActionResult> GetData(Guid id)
+        {
+            var command = new GetDataCommand(id);
+            var result = await _mediator.Send(command);
+
+            return Ok(result);
+        }
+
 
     }
 }
